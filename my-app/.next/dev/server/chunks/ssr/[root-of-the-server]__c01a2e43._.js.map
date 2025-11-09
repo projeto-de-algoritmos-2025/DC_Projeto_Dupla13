@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 14, "column": 0}, "map": {"version":3,"sources":["file:///home/will/repos/pa/dc/my-app/app/components/Navbar.tsx"],"sourcesContent":["export default function Navbar() {\n    return (\n        <nav className=\"flex justify-between items-center\">\n            <div className=\"\">\n                Sistema bacana\n            </div>\n        </nav>\n    )\n}"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACpB,qBACI,8OAAC;QAAI,WAAU;kBACX,cAAA,8OAAC;YAAI,WAAU;sBAAG;;;;;;;;;;;AAK9B","debugId":null}},
-    {"offset": {"line": 41, "column": 0}, "map": {"version":3,"sources":["file:///home/will/repos/pa/dc/my-app/app/%28dashboard%29/page.tsx"],"sourcesContent":["import Navbar from '@/app/components/Navbar'\n\nexport default function Page() {\n  return (\n    <Navbar />\n  )\n}"],"names":[],"mappings":";;;;;AAAA;;;AAEe,SAAS;IACtB,qBACE,8OAAC,uIAAM;;;;;AAEX","debugId":null}}]
-}
