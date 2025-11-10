@@ -16,16 +16,31 @@ export default function medianOfMedians(
     k: number,
     trackSteps = false,
     steps: StepLog[] = []
-): number | { result: number; steps: StepLog[] } {
+): number {
 
     let numericArr = extractValues(arr);
 
+    if (trackSteps) {
+        steps.push({
+            step: "Entrada da função",
+            data: { arr: numericArr, k }
+        });
+    }
+
     let sets = setsOf5(numericArr);
-    let pivot = medianOfEachGroup(sets);
 
     if (trackSteps) {
         steps.push({
-            step: "Pivot escolhido (mediana das medianas)",
+            step: "Divisão em grupos de no máximo 5 elementos",
+            data: sets
+        });
+    }
+
+    let pivot = medianOfEachGroup(sets, trackSteps, steps);
+
+    if (trackSteps) {
+        steps.push({
+            step: "Pivot escolhido (Mediana das Medianas)",
             data: pivot
         });
     }
@@ -34,20 +49,21 @@ export default function medianOfMedians(
 
     if (trackSteps) {
         steps.push({
-            step: "Dados particionados com base no pivô",
+            step: "Particionamento do vetor usando o pivô",
             data: extractedData
         });
     }
 
-    let result = conditionsFromOracle(
+    return conditionsFromOracle(
         extractedData,
         k,
         pivot,
-        (a, b) => medianOfMedians(a, b, trackSteps, steps) as number
+        (a, b) => medianOfMedians(a, b, trackSteps, steps),
+        trackSteps,
+        steps
     );
-    console.log(result)
-    return trackSteps ? { result, steps } : result;
 }
+
 
 /*
     Extrai valores numéricos caso o vetor contenha objetos
@@ -72,22 +88,31 @@ let setsOf5 = (arr: number[]): number[][] => {
     pega a mediana desse conjunto de medianas
 */
 
-let medianOfEachGroup = (sets: number[][]): number => {
+let medianOfEachGroup = (
+    sets: number[][],
+    trackSteps?: boolean,
+    steps?: StepLog[]
+): number => {
 
-    let middleIndex: number, medianOfMedians: number[];
-    medianOfMedians = [];
+    let medianOfMedians: number[] = [];
 
-    sets.map(group => {
+    sets.forEach((group, index) => {
         sortArr(group);
-        middleIndex = median(group);
+        let middleIndex = median(group);
         medianOfMedians.push(group[middleIndex]);
+
+        if (trackSteps && steps)
+            steps.push({
+                step: `Mediana do grupo ${index + 1}`,
+                data: { group, mediana: group[middleIndex] }
+            });
     });
 
-    middleIndex = median(medianOfMedians);
     sortArr(medianOfMedians);
-
+    let middleIndex = median(medianOfMedians);
     return medianOfMedians[middleIndex];
-}
+};
+
 
 /*  
     Etapa 3: Extrai dados do vetor original, sendo eles o número 
@@ -129,25 +154,55 @@ let partitionData = (arr: number[], medianOfMedians: number): PartitionInfo => {
 let conditionsFromOracle = (
     extractedData: PartitionInfo,
     k: number,
-    medianOfMedians: number,
-    medianOfMediansFn: (arr: number[], k: number) => number
+    pivot: number,
+    medianOfMediansFn: (arr: number[], k: number) => number,
+    trackSteps?: boolean,
+    steps?: StepLog[]
 ): number => {
 
     let { partitionedArr, leftCounter } = extractedData;
 
+    if (trackSteps && steps) {
+        steps.push({
+            step: "Verificando posição do pivô",
+            data: { pivot, leftCounter, k }
+        });
+    }
+
     if (leftCounter === k - 1) {
-        return medianOfMedians;
+        if (trackSteps && steps)
+            steps.push({
+                step: "Encontrou o elemento mediano",
+                data: pivot
+            });
+        return pivot;
     }
 
     if (leftCounter > k - 1) {
-        let leftSide = partitionedArr.slice(0, leftCounter);
-        return medianOfMediansFn(leftSide, k);
+        if (trackSteps && steps)
+            steps.push({
+                step: "Recursão para a esquerda",
+                data: partitionedArr.slice(0, leftCounter)
+            });
+
+        return medianOfMediansFn(
+            partitionedArr.slice(0, leftCounter),
+            k
+        );
     }
 
-    let rightSide = partitionedArr.slice(leftCounter + 1);
-    let newK = k - (leftCounter + 1);
-    return medianOfMediansFn(rightSide, newK);
-}
+    if (trackSteps && steps)
+        steps.push({
+            step: "Recursão para a direita",
+            data: partitionedArr.slice(leftCounter + 1)
+        });
+
+    return medianOfMediansFn(
+        partitionedArr.slice(leftCounter + 1),
+        k - (leftCounter + 1)
+    );
+};
+
 
 /* Tipagem do particionamento */
 export type PartitionInfo = {
